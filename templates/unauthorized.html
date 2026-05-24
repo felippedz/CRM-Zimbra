@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Acceso no autorizado{% endblock %}
+{% block content %}
+<div class="card">
+    <h1>Acceso no autorizado</h1>
+    <p>No tienes permiso para ver esta página.</p>
+    <p>Si crees que esto es un error, utiliza el menú para ir a una sección válida o contacta al administrador.</p>
+    <p><a class="btn-link" href="{{ url_for('dashboard') }}">Volver al dashboard</a></p>
+</div>
+{% endblock %}

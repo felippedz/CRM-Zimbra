@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Ventas{% endblock %}
+{% block content %}
+<h1>Ventas</h1>
+{% if ventas %}
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Servicio</th>
+            <th>Precio servicio</th>
+            <th>Cantidad</th>
+            <th>Total</th>
+            <th>Fecha</th>
+            <th>Estado pago</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for venta in ventas %}
+        <tr>
+            <td>{{ venta.id_venta }}</td>
+            <td>{{ venta.cliente }}</td>
+            <td>{{ venta.servicio }}</td>
+            <td>{{ venta.precio_servicio | currency }}</td>
+            <td>{{ venta.cantidad }}</td>
+            <td>{{ venta.total | currency }}</td>
+            <td>{{ venta.fecha }}</td>
+            <td>{{ venta.estado_pago }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No hay ventas registradas aún.</p>
+{% endif %}
+
+<h2>Registrar venta</h2>
+<form method="post" action="{{ url_for('registrar_venta') }}">
+    <div><label for="id_cliente">Cliente</label>
+        <select id="id_cliente" name="id_cliente" required>
+            {% for cliente in clientes %}
+            <option value="{{ cliente.id_cliente }}">{{ cliente.nombre }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div><label for="id_servicio">Servicio</label>
+        <select id="id_servicio" name="id_servicio" required>
+            {% for servicio in servicios %}
+            <option value="{{ servicio.id_servicio }}">{{ servicio.nombre }} - {{ servicio.precio | currency }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div><label for="id_campania">Campaña</label>
+        <select id="id_campania" name="id_campania" required>
+            {% for campania in campanias %}
+            <option value="{{ campania.id_campania }}">{{ campania.nombre }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div><label for="cantidad">Cantidad</label><input id="cantidad" name="cantidad" type="number" min="1" value="1" required></div>
+    <button type="submit">Registrar venta</button>
+</form>
+{% endblock %}

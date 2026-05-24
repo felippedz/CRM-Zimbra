@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Detalle del servicio{% endblock %}
+{% block content %}
+<div class="content-header">
+    <h1>Detalle del servicio</h1>
+</div>
+
+<div class="dashboard-grid columns-2">
+    <div class="card">
+        <h2>{{ servicio.nombre }}</h2>
+        <p><strong>Precio:</strong> {{ servicio.precio | currency }}</p>
+        <p><strong>Nivel:</strong> {{ servicio.nivel_servicio }}</p>
+        <p><strong>Estado:</strong> {{ servicio.estado }}</p>
+        <p><strong>Descripción:</strong></p>
+        <p>{{ servicio.descripcion }}</p>
+    </div>
+    <div class="card">
+        <h2>Acción</h2>
+        <p>Compra este servicio para activarlo en tu cuenta y comienza a recibir soporte desde Zimbra.</p>
+        <form method="post" action="{{ url_for('comprar_servicio') }}">
+            <input type="hidden" name="id_servicio" value="{{ servicio.id_servicio }}">
+            <button type="submit">Comprar ahora</button>
+        </form>
+        <p style="margin-top:1rem;"><a class="btn-link" href="{{ url_for('servicios') }}">Volver a servicios</a></p>
+    </div>
+</div>
+{% endblock %}

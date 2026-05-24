@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Mi perfil{% endblock %}
+{% block content %}
+<h1>Mi perfil</h1>
+{% if perfil %}
+<table>
+    <tbody>
+        <tr><th>Nombre</th><td>{{ perfil.nombre }}</td></tr>
+        <tr><th>Correo</th><td>{{ perfil.correo }}</td></tr>
+        <tr><th>Rol</th><td>{{ perfil.rol }}</td></tr>
+        {% if perfil.rol == 'CLIENTE' %}
+            <tr><th>Empresa</th><td>{{ perfil.empresa }}</td></tr>
+            <tr><th>Teléfono</th><td>{{ perfil.telefono }}</td></tr>
+            <tr><th>Nivel</th><td>{{ perfil.nivel }}</td></tr>
+        {% endif %}
+        <tr><th>Estado</th><td>{{ perfil.estado }}</td></tr>
+        <tr><th>Registrado desde</th><td>{{ perfil.fecha_registro }}</td></tr>
+    </tbody>
+</table>
+{% else %}
+<p>No se encontró el perfil.</p>
+{% endif %}
+{% endblock %}

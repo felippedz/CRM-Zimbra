@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}Servicios{% endblock %}
+{% block content %}
+<div class="content-header">
+    <h1>Servicios</h1>
+</div>
+
+<div class="service-stats">
+    <div class="card">
+        <h3>Servicios activos</h3>
+        <p>{{ total_disponibles }}</p>
+    </div>
+    <div class="card">
+        <h3>Servicios adquiridos</h3>
+        <p>{{ total_comprados }}</p>
+    </div>
+    <div class="card">
+        <h3>Activos</h3>
+        <p>{{ total_activos }}</p>
+    </div>
+    <div class="card">
+        <h3>Suspendidos</h3>
+        <p>{{ total_suspendidos }}</p>
+    </div>
+</div>
+
+<div class="dashboard-grid columns-2">
+    <div class="card">
+        <h2>Servicios disponibles</h2>
+        {% if servicios %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Servicio</th>
+                        <th>Precio</th>
+                        <th>Descripción</th>
+                        <th>Comprar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for servicio in servicios %}
+                    <tr>
+                        <td>{{ servicio.nombre }}</td>
+                        <td>{{ servicio.precio | currency }}</td>
+                        <td>{{ servicio.descripcion }}</td>
+                        <td>
+                            <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
+                                <a class="btn-link" href="{{ url_for('servicio_detalle', id=servicio.id_servicio) }}">Detalles</a>
+                                <form method="post" action="{{ url_for('comprar_servicio') }}" style="margin:0;">
+                                    <input type="hidden" name="id_servicio" value="{{ servicio.id_servicio }}">
+                                    <button type="submit">Comprar</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty-state">No hay servicios activos disponibles.</div>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h2>Mis servicios</h2>
+        {% if comprados %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Servicio</th>
+                        <th>Precio</th>
+                        <th>Inicio</th>
+                        <th>Fin</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for servicio in comprados %}
+                    <tr>
+                        <td>{{ servicio.nombre }}</td>
+                        <td>{{ servicio.precio | currency }}</td>
+                        <td>{{ servicio.fecha_inicio }}</td>
+                        <td>{{ servicio.fecha_fin }}</td>
+                        <td><span class="status-pill {{ servicio.estado|lower }}">{{ servicio.estado }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty-state">Aún no has comprado ningún servicio.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

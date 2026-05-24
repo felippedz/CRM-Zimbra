@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}Reportes{% endblock %}
+{% block content %}
+<h1>Reportes</h1>
+
+<form method="get" action="{{ url_for('reportes') }}">
+    <div><label for="fecha_inicio">Desde</label><input id="fecha_inicio" name="fecha_inicio" type="date" value="{{ filters.fecha_inicio }}"></div>
+    <div><label for="fecha_fin">Hasta</label><input id="fecha_fin" name="fecha_fin" type="date" value="{{ filters.fecha_fin }}"></div>
+    <div><label for="campania">Campaña</label>
+        <select id="campania" name="campania">
+            <option value="">Todas</option>
+            {% for item in campanias %}
+            <option value="{{ item.id_campania }}" {% if filters.campania == item.id_campania|string %}selected{% endif %}>{{ item.nombre }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit">Aplicar filtros</button>
+</form>
+
+<h2>Mejores clientes</h2>
+{% if mejores_clientes %}
+<p><a href="{{ url_for('export_report', report_type='clientes', fecha_inicio=filters.fecha_inicio, fecha_fin=filters.fecha_fin, campania=filters.campania) }}">Descargar CSV</a></p>
+<table>
+    <thead>
+        <tr>
+            {% for key in mejores_clientes[0].keys() %}
+            <th>{{ key }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in mejores_clientes %}
+        <tr>
+            {% for value in row.values() %}
+            <td>{{ value }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No hay datos para este reporte aún.</p>
+{% endif %}
+
+<h2>Ventas mensuales</h2>
+{% if ventas_mensuales %}
+<p><a href="{{ url_for('export_report', report_type='mensuales', fecha_inicio=filters.fecha_inicio, fecha_fin=filters.fecha_fin, campania=filters.campania) }}">Descargar CSV</a></p>
+<table>
+    <thead>
+        <tr>
+            {% for key in ventas_mensuales[0].keys() %}
+            <th>{{ key }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in ventas_mensuales %}
+        <tr>
+            {% for value in row.values() %}
+            <td>{{ value }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No hay datos de ventas mensuales.</p>
+{% endif %}
+
+<h2>Rendimiento de campañas</h2>
+{% if rendimiento %}
+<p><a href="{{ url_for('export_report', report_type='campanias', fecha_inicio=filters.fecha_inicio, fecha_fin=filters.fecha_fin, campania=filters.campania) }}">Descargar CSV</a></p>
+<table>
+    <thead>
+        <tr>
+            {% for key in rendimiento[0].keys() %}
+            <th>{{ key }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in rendimiento %}
+        <tr>
+            {% for value in row.values() %}
+            <td>{{ value }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No hay datos de rendimiento.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Empleados{% endblock %}
+{% block content %}
+<h1>Empleados</h1>
+
+{% if empleados %}
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Correo</th>
+            <th>Departamento</th>
+            <th>Cargo</th>
+            <th>Salario</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for empleado in empleados %}
+        <tr>
+            <td>{{ empleado.id_empleado }}</td>
+            <td>{{ empleado.nombre }}</td>
+            <td>{{ empleado.correo }}</td>
+            <td>{{ empleado.departamento }}</td>
+            <td>{{ empleado.cargo }}</td>
+            <td>{{ empleado.salario | currency }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No hay empleados registrados.</p>
+{% endif %}
+
+<h2>Registrar empleado</h2>
+<form method="post" action="{{ url_for('registrar_empleado') }}">
+    <div><label for="nombre">Nombre</label><input id="nombre" name="nombre" required></div>
+    <div><label for="correo">Correo</label><input id="correo" name="correo" type="email" required></div>
+    <div><label for="password">Contraseña</label><input id="password" name="password" type="password" required></div>
+    <div><label for="id_departamento">Departamento</label>
+        <select id="id_departamento" name="id_departamento" required>
+            {% for dep in departamentos %}
+                <option value="{{ dep.id_departamento }}">{{ dep.nombre }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div><label for="cargo">Cargo</label><input id="cargo" name="cargo"></div>
+    <div><label for="salario">Salario</label><input id="salario" name="salario" type="number" step="0.01"></div>
+    <button type="submit">Crear empleado</button>
+</form>
+{% endblock %}
