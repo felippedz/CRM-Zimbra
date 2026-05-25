@@ -3,7 +3,8 @@
 {% block content %}
 <h1>Clientes</h1>
 {% if clientes %}
-<table>
+<div class="table-wrapper">
+<table class="data-table">
     <thead>
         <tr>
             <th>ID</th>
@@ -34,6 +35,7 @@
         {% endfor %}
     </tbody>
 </table>
+</div>
 {% endif %}
 
 {% if cliente_editar %}
@@ -47,6 +49,7 @@
 </form>
 {% endif %}
 
+{% if not cliente_editar %}
 <h2>Registrar cliente</h2>
 <form method="post" action="{{ url_for('registrar_cliente') }}">
     <div><label for="nombre">Nombre</label><input id="nombre" name="nombre" required></div>

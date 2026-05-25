@@ -3,6 +3,7 @@
 {% block content %}
 <h1>Mi perfil</h1>
 {% if perfil %}
+<form method="post" action="{{ url_for('actualizar_password') }}">
 <table>
     <tbody>
         <tr><th>Nombre</th><td>{{ perfil.nombre }}</td></tr>
@@ -15,8 +16,13 @@
         {% endif %}
         <tr><th>Estado</th><td>{{ perfil.estado }}</td></tr>
         <tr><th>Registrado desde</th><td>{{ perfil.fecha_registro }}</td></tr>
+        <tr><th>Contraseña actual</th><td><input type="password" name="current_password" placeholder="Ingresa tu contraseña actual" required></td></tr>
+        <tr><th>Nueva contraseña</th><td><input type="password" name="password" placeholder="Ingresa nueva contraseña" required></td></tr>
+        <tr><th>Confirmar nueva</th><td><input type="password" name="confirm_password" placeholder="Confirma la nueva contraseña" required></td></tr>
     </tbody>
 </table>
+<button type="submit" class="btn">Actualizar contraseña</button>
+</form>
 {% else %}
 <p>No se encontró el perfil.</p>
 {% endif %}

@@ -1,7 +1,7 @@
 import csv
 import io
 import os
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 from flask import (
     Flask,
@@ -32,6 +32,44 @@ from auth import (
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'zimbra_secret_key_2026')
+
+
+@app.context_processor
+def inject_theme():
+    user = current_user()
+    theme_class = 'theme-default'
+    current_level = None
+
+    if user:
+        if user['rol'] == 'ADMIN':
+            theme_class = 'theme-admin'
+        elif user['rol'] == 'EMPLEADO':
+            theme_class = 'theme-employee'
+        elif user['rol'] == 'CLIENTE':
+            nivel = fetchone(
+                "SELECT n.nombre FROM clientes c INNER JOIN niveles_cliente n ON c.id_nivel = n.id_nivel WHERE c.id_usuario = ?",
+                (user['id'],)
+            )
+            if nivel and nivel.get('nombre'):
+                current_level = nivel['nombre'].upper()
+                if current_level == 'PROSPECTO':
+                    theme_class = 'theme-prospecto'
+                elif current_level == 'CLIENTE':
+                    theme_class = 'theme-cliente'
+                elif current_level == 'BRONCE':
+                    theme_class = 'theme-bronce'
+                elif current_level == 'PLATA':
+                    theme_class = 'theme-plata'
+                elif current_level == 'ORO':
+                    theme_class = 'theme-oro'
+                else:
+                    theme_class = 'theme-cliente'
+
+    return {
+        'theme_class': theme_class,
+        'current_level': current_level,
+        'current_user': user
+    }
 
 
 def format_currency(value):
@@ -193,6 +231,16 @@ def dashboard():
     ORDER BY v.fecha DESC
     """)
 
+    for venta in ventas:
+        if venta.get('fecha'):
+            try:
+                venta['fecha'] = venta['fecha'].strftime('%d/%m/%Y')
+            except Exception:
+                try:
+                    venta['fecha'] = datetime.strptime(str(venta['fecha'])[:10], '%Y-%m-%d').strftime('%d/%m/%Y')
+                except Exception:
+                    venta['fecha'] = str(venta['fecha'])[:10]
+
     ventas_por_mes = fetchall("""
     SELECT
         YEAR(fecha) AS anio,
@@ -318,27 +366,19 @@ def comprar_servicio():
     )
 
     id_servicio = request.form['id_servicio']
-    fecha_inicio = date.today()
-    fecha_fin = fecha_inicio + timedelta(days=30)
 
     try:
-        execute("""
-        INSERT INTO cliente_servicios(
-            id_cliente,
-            id_servicio,
-            estado,
-            fecha_inicio,
-            fecha_fin
+        execute(
+            "EXEC registrar_venta ?, ?, ?, ?",
+            (
+                cliente['id_cliente'],
+                None,
+                id_servicio,
+                1
+            )
         )
-        VALUES(?, ?, 'ACTIVO', ?, ?)
-        """, (
-            cliente['id_cliente'],
-            id_servicio,
-            fecha_inicio,
-            fecha_fin
-        ))
 
-        flash('Servicio comprado correctamente. Revisa tu panel de servicios.', 'success')
+        flash('Servicio comprado correctamente. Nivel de cliente actualizado automáticamente.', 'success')
     except Exception as e:
         flash(str(e), 'error')
 
@@ -454,6 +494,7 @@ def eliminar_cliente(id):
             flash('Cliente no encontrado', 'error')
             return redirect(url_for('clientes'))
 
+        execute("DELETE FROM auditoria_ventas WHERE id_venta IN (SELECT id_venta FROM ventas WHERE id_cliente = ?)", (id,))
         execute("DELETE FROM detalle_venta WHERE id_venta IN (SELECT id_venta FROM ventas WHERE id_cliente = ?)", (id,))
         execute("DELETE FROM ventas WHERE id_cliente = ?", (id,))
         execute("DELETE FROM cliente_servicios WHERE id_cliente = ?", (id,))
@@ -626,6 +667,191 @@ def registrar_empleado():
         flash(str(e), 'error')
 
     return redirect(url_for('empleados'))
+
+@app.route('/empleados/editar/<int:id>', methods=['GET', 'POST'])
+@require_role('ADMIN')
+def editar_empleado(id):
+
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        correo = request.form['correo']
+        id_departamento = request.form['id_departamento']
+        cargo = request.form['cargo']
+        salario = request.form['salario']
+
+        try:
+            execute("""
+            UPDATE usuarios
+            SET nombre = ?, correo = ?
+            WHERE id_usuario = (
+                SELECT id_usuario FROM empleados WHERE id_empleado = ?
+            )
+            """, (nombre, correo, id))
+
+            execute("""
+            UPDATE empleados
+            SET id_departamento = ?, cargo = ?, salario = ?
+            WHERE id_empleado = ?
+            """, (id_departamento, cargo, salario, id))
+
+            flash('Empleado actualizado correctamente', 'success')
+            return redirect(url_for('empleados'))
+        except Exception as e:
+            flash(str(e), 'error')
+
+    empleado_editar = fetchone("""
+    SELECT
+        e.id_empleado,
+        e.id_departamento,
+        e.cargo,
+        e.salario,
+        u.nombre,
+        u.correo
+    FROM empleados e
+    INNER JOIN usuarios u
+        ON e.id_usuario = u.id_usuario
+    WHERE e.id_empleado = ?
+    """, (id,))
+
+    lista = fetchall("""
+    SELECT
+        e.id_empleado,
+        u.nombre,
+        u.correo,
+        d.nombre AS departamento,
+        e.cargo,
+        e.salario
+    FROM empleados e
+    INNER JOIN usuarios u
+        ON e.id_usuario = u.id_usuario
+    INNER JOIN departamentos d
+        ON e.id_departamento = d.id_departamento
+    ORDER BY u.nombre
+    """)
+
+    departamentos = fetchall(
+        "SELECT id_departamento, nombre FROM departamentos ORDER BY nombre"
+    )
+
+    return render_template(
+        'empleados.html',
+        empleados=lista,
+        departamentos=departamentos,
+        empleado_editar=empleado_editar,
+        current_user=current_user()
+    )
+
+@app.route('/empleados/eliminar/<int:id>', methods=['POST'])
+@require_role('ADMIN')
+def eliminar_empleado(id):
+
+    try:
+        usuario = fetchone(
+            "SELECT id_usuario FROM empleados WHERE id_empleado = ?",
+            (id,)
+        )
+
+        if usuario is None:
+            flash('Empleado no encontrado', 'error')
+            return redirect(url_for('empleados'))
+
+        execute("DELETE FROM empleados WHERE id_empleado = ?", (id,))
+        execute("DELETE FROM usuarios WHERE id_usuario = ?", (usuario['id_usuario'],))
+
+        flash('Empleado eliminado correctamente', 'success')
+    except Exception as e:
+        flash(str(e), 'error')
+
+    return redirect(url_for('empleados'))
+
+@app.route('/niveles')
+@require_role('ADMIN')
+def niveles():
+
+    niveles = fetchall(
+        "SELECT id_nivel, nombre, monto_minimo, descuento FROM niveles_cliente ORDER BY monto_minimo"
+    )
+
+    return render_template(
+        'niveles.html',
+        niveles=niveles,
+        current_user=current_user()
+    )
+
+@app.route('/niveles/registrar', methods=['POST'])
+@require_role('ADMIN')
+def registrar_nivel():
+
+    nombre = request.form['nombre']
+    monto_minimo = request.form['monto_minimo']
+    descuento = request.form['descuento']
+
+    try:
+        execute(
+            "INSERT INTO niveles_cliente(nombre, monto_minimo, descuento) VALUES(?, ?, ?)",
+            (nombre, monto_minimo, descuento)
+        )
+        flash('Nivel registrado correctamente', 'success')
+    except Exception as e:
+        flash(str(e), 'error')
+
+    return redirect(url_for('niveles'))
+
+@app.route('/niveles/editar/<int:id>', methods=['GET', 'POST'])
+@require_role('ADMIN')
+def editar_nivel(id):
+
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        monto_minimo = request.form['monto_minimo']
+        descuento = request.form['descuento']
+
+        try:
+            execute(
+                "UPDATE niveles_cliente SET nombre = ?, monto_minimo = ?, descuento = ? WHERE id_nivel = ?",
+                (nombre, monto_minimo, descuento, id)
+            )
+            flash('Nivel actualizado correctamente', 'success')
+            return redirect(url_for('niveles'))
+        except Exception as e:
+            flash(str(e), 'error')
+
+    nivel_editar = fetchone(
+        "SELECT id_nivel, nombre, monto_minimo, descuento FROM niveles_cliente WHERE id_nivel = ?",
+        (id,)
+    )
+
+    niveles = fetchall(
+        "SELECT id_nivel, nombre, monto_minimo, descuento FROM niveles_cliente ORDER BY monto_minimo"
+    )
+
+    return render_template(
+        'niveles.html',
+        niveles=niveles,
+        nivel_editar=nivel_editar,
+        current_user=current_user()
+    )
+
+@app.route('/niveles/eliminar/<int:id>', methods=['POST'])
+@require_role('ADMIN')
+def eliminar_nivel(id):
+
+    try:
+        cliente_relacionado = fetchone(
+            "SELECT COUNT(*) AS total FROM clientes WHERE id_nivel = ?",
+            (id,)
+        )
+
+        if cliente_relacionado and cliente_relacionado['total'] > 0:
+            flash('No se puede eliminar un nivel asignado a clientes.', 'error')
+            return redirect(url_for('niveles'))
+
+        execute("DELETE FROM niveles_cliente WHERE id_nivel = ?", (id,))
+        flash('Nivel eliminado correctamente', 'success')
+    except Exception as e:
+        flash(str(e), 'error')
+
+    return redirect(url_for('niveles'))
 
 # =====================================================
 # VENTAS
@@ -1110,6 +1336,47 @@ def mi_perfil():
         perfil=perfil,
         current_user=current_user()
     )
+
+@app.route('/mi_perfil/actualizar_password', methods=['POST'])
+@login_required
+def actualizar_password():
+
+    usuario = current_user()
+    contrasena_actual = request.form.get('current_password', '').strip()
+    nueva_contrasena = request.form.get('password', '').strip()
+    confirmacion = request.form.get('confirm_password', '').strip()
+
+    if not contrasena_actual or not nueva_contrasena or not confirmacion:
+        flash('Completa todos los campos de contraseña.', 'error')
+        return redirect(url_for('mi_perfil'))
+
+    if nueva_contrasena != confirmacion:
+        flash('La nueva contraseña y la confirmación no coinciden.', 'error')
+        return redirect(url_for('mi_perfil'))
+
+    usuario_db = fetchone(
+        "SELECT password_hash FROM usuarios WHERE id_usuario = ?",
+        (usuario['id'],)
+    )
+
+    if not usuario_db or not check_password(contrasena_actual, usuario_db['password_hash']):
+        flash('Contraseña actual incorrecta.', 'error')
+        return redirect(url_for('mi_perfil'))
+
+    if contrasena_actual == nueva_contrasena:
+        flash('La nueva contraseña debe ser diferente de la actual.', 'error')
+        return redirect(url_for('mi_perfil'))
+
+    try:
+        execute(
+            "UPDATE usuarios SET password_hash = ? WHERE id_usuario = ?",
+            (hash_password(nueva_contrasena), usuario['id'])
+        )
+        flash('Contraseña actualizada correctamente.', 'success')
+    except Exception as e:
+        flash(f'Error al actualizar la contraseña: {e}', 'error')
+
+    return redirect(url_for('mi_perfil'))
 
 # =====================================================
 # MAIN

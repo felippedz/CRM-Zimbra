@@ -14,6 +14,69 @@
             --muted: #7f8c8d;
             --border: #dfe4ea;
         }
+        body.theme-admin {
+            --bg: #e6e6e6;
+            --primary: #5f6368;
+            --primary-light: #7d7f85;
+            --surface: #f4f4f4;
+            --text: #222222;
+            --muted: #4f4f4f;
+            --border: #c2c2c2;
+        }
+        body.theme-employee {
+            --bg: #f4efff;
+            --primary: #6d28d9;
+            --primary-light: #8b5cf6;
+            --surface: #faf5ff;
+            --text: #2c0d45;
+            --muted: #5b3e8a;
+            --border: #d8c6ff;
+        }
+        body.theme-prospecto {
+            --bg: #ffffff;
+            --primary: #6c757d;
+            --primary-light: #8a99a7;
+            --surface: #f9fbfc;
+            --text: #2f3a44;
+            --muted: #6c757d;
+            --border: #dee2e6;
+        }
+        body.theme-cliente {
+            --bg: #e6f4ea;
+            --primary: #2e7d32;
+            --primary-light: #4caf50;
+            --surface: #ffffff;
+            --text: #1b5e20;
+            --muted: #4f7942;
+            --border: #c8e6c9;
+        }
+        body.theme-bronce {
+            --bg: #fff4e6;
+            --primary: #b87333;
+            --primary-light: #d99a66;
+            --surface: #fff8f2;
+            --text: #5b3a22;
+            --muted: #8e6239;
+            --border: #f0d8c2;
+        }
+        body.theme-plata {
+            --bg: #eef4ff;
+            --primary: #4a6ea1;
+            --primary-light: #7d9ad9;
+            --surface: #f9fbff;
+            --text: #1e3250;
+            --muted: #5f7eab;
+            --border: #d9e4ff;
+        }
+        body.theme-oro {
+            --bg: #fff8e1;
+            --primary: #c49100;
+            --primary-light: #ffbf00;
+            --surface: #fff9e7;
+            --text: #5d4500;
+            --muted: #8d6e2f;
+            --border: #fae6ad;
+        }
         * { box-sizing: border-box; }
         body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); }
         a { color: inherit; text-decoration: none; }
@@ -32,12 +95,25 @@
         .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
         .stats .card { text-align: center; }
         .card h2 { margin-top: 0; }
-        .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 1.25rem; min-width: 600px; }
-        th, td { padding: .85rem 1rem; border: 1px solid #e1e6ef; white-space: nowrap; }
-        th { background: #f1f4f8; text-align: left; font-weight: 600; }
-        tr:nth-child(even) { background: #f9fbff; }
+        .table-wrapper { margin: 1rem 0; overflow-x: auto; }
+        .data-table { width: 100%; border-collapse: collapse; margin-bottom: 1.25rem; min-width: 700px; }
+        .data-table th:first-child,
+        .data-table td:first-child { display: none; }
+        .data-table th, .data-table td { padding: .85rem 1rem; border: 1px solid #e1e6ef; white-space: nowrap; }
+        .data-table th { background: #f1f4f8; text-align: left; font-weight: 600; }
+        .data-table tr:nth-child(even) { background: #f9fbff; }
         .flash { padding: .85rem 1rem; margin-bottom: 1rem; border-radius: 8px; }
+        h1, h2, h3 { text-transform: capitalize; }
+        .menu-toggle { display: none; background: transparent; border: 1px solid rgba(255,255,255,0.5); color: white; font-size: 1.2rem; padding: 0.65rem 0.9rem; border-radius: 8px; cursor: pointer; }
+        .sidebar { width: 240px; background: var(--primary); color: white; padding: 1.5rem 1rem; display: flex; flex-direction: column; transition: transform .2s ease; }
+        .app-shell.menu-open .sidebar { transform: translateX(0); }
+        @media (max-width: 768px) {
+            .app-shell { flex-direction: column; }
+            .sidebar { position: absolute; top: 0; left: 0; transform: translateX(-100%); width: 100%; max-width: 320px; height: 100vh; z-index: 1000; }
+            .main { width: 100%; }
+            .menu-toggle { display: inline-flex; }
+            .topbar { justify-content: space-between; }
+        }
         .flash.success { background: #d4edda; color: #155724; }
         .flash.error { background: #f8d7da; color: #721c24; }
         form > div { margin-bottom: 1rem; }
@@ -84,7 +160,7 @@
         }
     </style>
 </head>
-<body>
+<body class="{{ theme_class }}">
     <div class="app-shell">
         <aside class="sidebar">
             <div class="brand">CRM Zimbra</div>
@@ -97,6 +173,7 @@
                     {% endif %}
                     {% if current_user.rol == 'ADMIN' %}
                         <a href="{{ url_for('campanias') }}" class="{% if request.endpoint == 'campanias' %}active{% endif %}"><span class="nav-icon">📣</span> Campañas</a>
+                        <a href="{{ url_for('niveles') }}" class="{% if request.endpoint in ['niveles', 'editar_nivel'] %}active{% endif %}"><span class="nav-icon">🏷️</span> Niveles</a>
                         <a href="{{ url_for('empleados') }}" class="{% if request.endpoint == 'empleados' %}active{% endif %}"><span class="nav-icon">🧑‍💼</span> Empleados</a>
                         <a href="{{ url_for('reportes') }}" class="{% if request.endpoint == 'reportes' %}active{% endif %}"><span class="nav-icon">📈</span> Reportes</a>
                     {% endif %}
@@ -114,7 +191,10 @@
         </aside>
         <div class="main">
             <header class="topbar">
-                <div class="topbar-title">CRM Zimbra</div>
+                <div>
+                    <button class="menu-toggle" type="button" aria-label="Toggle menu">☰</button>
+                    <span class="topbar-title">CRM Zimbra</span>
+                </div>
                 <div class="user-info">
                     {% if current_user %}
                         {{ current_user.nombre }}{% if current_user.rol %} · {{ current_user.rol }}{% endif %}
@@ -132,6 +212,17 @@
             </footer>
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggle = document.querySelector('.menu-toggle');
+            const shell = document.querySelector('.app-shell');
+            if (toggle && shell) {
+                toggle.addEventListener('click', function() {
+                    shell.classList.toggle('menu-open');
+                });
+            }
+        });
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

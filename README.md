@@ -147,10 +147,16 @@ El archivo `script.sql` crea la base de datos, tablas, datos iniciales y objetos
 - `/` - dashboard.
 - `/clientes` - listado de clientes.
 - `/clientes/registrar` - registra un nuevo cliente.
+- `/clientes/editar/<id>` - editar la información de un cliente.
 - `/ventas` - listado de ventas.
 - `/ventas/registrar` - registra una nueva venta.
 - `/campanias` - listado de campañas.
+- `/niveles` - listado de niveles de cliente, creación, edición y eliminación (solo ADMIN).
 - `/reportes` - muestra reportes.
+- `/servicios` - lista de servicios disponibles y servicios comprados.
+- `/servicios/<id>` - detalle de servicio.
+- `/servicios/comprar` - compra un servicio para el cliente autenticado.
+- `/empleados` - listado y registro de empleados (solo ADMIN).
 - `/mi_perfil` - perfil del cliente.
 
 ### Acceso a datos
@@ -182,7 +188,8 @@ Para mantener ordenado el proyecto:
 ### Dashboard
 
 - Muestra totales clave: ventas, clientes y servicios.
-- Presenta las últimas ventas registradas.
+- Presenta las últimas ventas registradas con fechas en formato corto `dd/mm/YYYY`.
+- Incluye gráficos de ventas mensuales e ingresos por campaña para los roles administrativos.
 
 ### Clientes
 
@@ -201,6 +208,12 @@ Para mantener ordenado el proyecto:
 - En `/campanias` se visualiza la lista de campañas comerciales.
 - Solo usuarios `ADMIN` pueden ver esta sección.
 
+### Niveles
+
+- En `/niveles` se administran los niveles de cliente.
+- Los usuarios `ADMIN` pueden crear, editar y eliminar niveles.
+- No se permite eliminar un nivel que esté asignado a clientes.
+
 ### Reportes
 
 - En `/reportes` se cargan:
@@ -213,6 +226,17 @@ Para mantener ordenado el proyecto:
 
 - En `/mi_perfil` el cliente ve su información personal y de empresa.
 - Solo los usuarios con rol `CLIENTE` pueden acceder.
+
+### Servicios
+
+- En `/servicios` el cliente puede ver servicios disponibles y servicios ya adquiridos.
+- Se puede ver el detalle de un servicio con `/servicios/<id>` y comprarlo con el botón de compra.
+- Los servicios activados se registran con fechas de inicio y fin automáticas.
+
+### Empleados
+
+- En `/empleados` el administrador puede ver la lista de empleados y registrar nuevos usuarios de tipo empleado.
+- El formulario crea el usuario en `usuarios` y el perfil de empleado en `empleados`.
 
 ### Permisos de roles
 
