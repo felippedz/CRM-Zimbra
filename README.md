@@ -58,26 +58,6 @@ La aplicación opera sobre una base de datos SQL Server y contiene una interfaz 
 
 ---
 
-## Configuración técnica
-
-El proyecto usa variables de entorno opcionales en `backend.py` y `app.py`:
-
-- `SQL_SERVER` - servidor SQL Server, por defecto `localhost,1433`.
-- `SQL_DATABASE` - base de datos, por defecto `zimbra_crm`.
-- `ODBC_DRIVER` - controlador ODBC, por defecto `ODBC Driver 18 for SQL Server`.
-- `SECRET_KEY` - clave secreta Flask para sesiones y seguridad.
-
-Ejemplo de uso:
-
-```powershell
-$env:SQL_SERVER = 'localhost,1433'
-$env:SQL_DATABASE = 'zimbra_crm'
-$env:ODBC_DRIVER = 'ODBC Driver 18 for SQL Server'
-$env:SECRET_KEY = 'mi_clave_segura'
-```
-
----
-
 ## Base de datos
 
 El archivo `script.sql` crea la base de datos, tablas, datos iniciales y objetos necesarios para la aplicación:
