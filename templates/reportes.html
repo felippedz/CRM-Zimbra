@@ -19,12 +19,12 @@
 
 <h2>Mejores clientes</h2>
 {% if mejores_clientes %}
-<p><a href="{{ url_for('export_report', report_type='clientes', fecha_inicio=filters.fecha_inicio, fecha_fin=filters.fecha_fin, campania=filters.campania) }}">Descargar CSV</a></p>
-<table>
+<p><a class="btn btn-primary" href="{{ url_for('export_report', report_type='clientes', fecha_inicio=filters.fecha_inicio, fecha_fin=filters.fecha_fin, campania=filters.campania) }}">Descargar CSV</a></p>
+<table class="data-table">
     <thead>
         <tr>
             {% for key in mejores_clientes[0].keys() %}
-            <th>{{ key }}</th>
+            <th> {{ key.replace('_', ' ').title() }}</th>
             {% endfor %}
         </tr>
     </thead>
@@ -44,12 +44,12 @@
 
 <h2>Ventas mensuales</h2>
 {% if ventas_mensuales %}
-<p><a href="{{ url_for('export_report', report_type='mensuales', fecha_inicio=filters.fecha_inicio, fecha_fin=filters.fecha_fin, campania=filters.campania) }}">Descargar CSV</a></p>
-<table>
+<p><a class="btn-primary" href="{{ url_for('export_report', report_type='mensuales', fecha_inicio=filters.fecha_inicio, fecha_fin=filters.fecha_fin, campania=filters.campania) }}">Descargar CSV</a></p>
+<table class="data-table">
     <thead>
         <tr>
             {% for key in ventas_mensuales[0].keys() %}
-            <th>{{ key }}</th>
+            <th> {{ key.replace('_', ' ').title() }}</th>
             {% endfor %}
         </tr>
     </thead>
@@ -69,12 +69,12 @@
 
 <h2>Rendimiento de campañas</h2>
 {% if rendimiento %}
-<p><a href="{{ url_for('export_report', report_type='campanias', fecha_inicio=filters.fecha_inicio, fecha_fin=filters.fecha_fin, campania=filters.campania) }}">Descargar CSV</a></p>
-<table>
+<p><a class="btn btn-primary"href="{{ url_for('export_report', report_type='campanias', fecha_inicio=filters.fecha_inicio, fecha_fin=filters.fecha_fin, campania=filters.campania) }}">Descargar CSV</a></p>
+<table class="data-table">
     <thead>
         <tr>
             {% for key in rendimiento[0].keys() %}
-            <th>{{ key }}</th>
+            <th> {{ key.replace('_', ' ').title() }}</th>
             {% endfor %}
         </tr>
     </thead>
@@ -92,3 +92,36 @@
 <p>No hay datos de rendimiento.</p>
 {% endif %}
 {% endblock %}
+
+<style>
+    .btn {
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 10px 18px;
+
+    border-radius: 10px;
+
+    font-weight: 600;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+
+    border: none;
+}
+.btn-primary {
+
+    background-color: #2563eb;
+
+    color: white;
+}
+.btn:active {
+
+    transform: scale(0.98);
+}
+</style>

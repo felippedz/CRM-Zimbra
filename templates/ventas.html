@@ -3,10 +3,9 @@
 {% block content %}
 <h1>Ventas</h1>
 {% if ventas %}
-<table>
+<table class="data-table">
     <thead>
         <tr>
-            <th>ID</th>
             <th>Cliente</th>
             <th>Servicio</th>
             <th>Precio servicio</th>
@@ -19,7 +18,6 @@
     <tbody>
         {% for venta in ventas %}
         <tr>
-            <td>{{ venta.id_venta }}</td>
             <td>{{ venta.cliente }}</td>
             <td>{{ venta.servicio }}</td>
             <td>{{ venta.precio_servicio | currency }}</td>

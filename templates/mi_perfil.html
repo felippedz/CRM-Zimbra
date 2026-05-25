@@ -4,7 +4,7 @@
 <h1>Mi perfil</h1>
 {% if perfil %}
 <form method="post" action="{{ url_for('actualizar_password') }}">
-<table>
+<table class="data-table">
     <tbody>
         <tr><th>Nombre</th><td>{{ perfil.nombre }}</td></tr>
         <tr><th>Correo</th><td>{{ perfil.correo }}</td></tr>

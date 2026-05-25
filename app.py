@@ -354,7 +354,9 @@ def servicio_detalle(id):
         servicio=servicio,
         current_user=current_user()
     )
-
+# =====================================================
+# COMPRAR SERVICIOS
+# =====================================================
 @app.route('/servicios/comprar', methods=['POST'])
 @require_role('CLIENTE')
 def comprar_servicio():
@@ -413,6 +415,10 @@ def clientes():
         clientes=lista,
         current_user=current_user()
     )
+
+# =====================================================
+# EDITAR CLIENTE
+# =====================================================
 
 @app.route('/clientes/editar/<int:id>', methods=['GET', 'POST'])
 @require_role('ADMIN')
@@ -479,7 +485,9 @@ def editar_cliente(id):
         cliente_editar=cliente_editar,
         current_user=current_user()
     )
-
+# =====================================================
+# ELIMINAR CLIENTE
+# =====================================================
 @app.route('/clientes/eliminar/<int:id>', methods=['POST'])
 @require_role('ADMIN')
 def eliminar_cliente(id):
