@@ -226,22 +226,6 @@ Para mantener ordenado el proyecto:
 
 ---
 
-## Capturas de pantalla
-
-Agrega aquí los pantallazos de la funcionalidad una vez que los tengas.
-
-- `Login`
-- `Dashboard`
-- `Clientes`
-- `Ventas`
-- `Campañas`
-- `Reportes`
-- `Mi perfil`
-
-> Consejo: crea una carpeta `docs/screenshots` y coloca las imágenes allí.
-
----
-
 ## Soporte
 
 Para dudas o mejoras, revisa las rutas de `app.py` y el archivo `script.sql` para la estructura de datos.
