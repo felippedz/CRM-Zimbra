@@ -16,48 +16,6 @@
             --border: #dfe4ea;
         }
 
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 10px 18px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .btn-primary {
-            background: #2563eb;
-            color: white;
-        }
-
-        .btn-edit {
-            background: #2563eb;
-            color: white;
-        }
-
-        .btn-danger {
-            background: #dc2626;
-            color: white;
-        }
-
-        .table-wrapper {
-            width: 100%;
-            overflow-x: auto;
-        }
-
-        .data-table {
-            width: 100%;
-        }
-
-        .actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
         body.theme-admin {
             --bg: #e6e6e6;
             --primary: #5f6368;
@@ -473,30 +431,6 @@
             gap: 5px;
         }
 
-        .table-wrapper {
-            width: 100%;
-            overflow-x: auto;
-        }
-
-        td:last-child,
-        th:last-child {
-            width: 1%;
-            white-space: nowrap;
-        }
-
-        .btn-edit,
-        .btn-danger {
-            padding: 6px 10px;
-            font-size: 14px;
-            min-width: auto;
-        }
-
-        td .acciones {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
         @media (max-width: 1024px) {
             .sidebar {
                 width: 220px;
@@ -581,7 +515,10 @@
 <body class="{{ theme_class }}">
     <div class="app-shell">
         <aside class="sidebar">
-            <div class="brand">CRM Zimbra</div>
+            <div class="brand">
+                CRM
+                <span>Zimbra</span>
+            </div>
             {% if current_user %}
             <nav>
                 <a href="{{ url_for('dashboard') }}"
@@ -631,9 +568,29 @@
                     <span class="topbar-title">CRM Zimbra</span>
                 </div>
                 <div class="user-info">
+
                     {% if current_user %}
-                    {{ current_user.nombre }}{% if current_user.rol %} · {{ current_user.rol }}{% endif %}
+
+                    <div class="avatar">
+                        {{ current_user.nombre[0] }}
+                    </div>
+
+                    <div class="user-details">
+
+                        <div class="user-name">
+                            {{ current_user.nombre }}
+                        </div>
+
+                        {% if current_user.rol %}
+                        <div class="role-badge">
+                            {{ current_user.rol }}
+                        </div>
+                        {% endif %}
+
+                    </div>
+
                     {% endif %}
+
                 </div>
             </header>
             <main class="container">
