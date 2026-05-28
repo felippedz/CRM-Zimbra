@@ -1,9 +1,79 @@
 {% extends 'base.html' %}
 {% block title %}Ventas{% endblock %}
+
 {% block content %}
+
+<style>
+
+.modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.5);
+    z-index:9999;
+}
+
+.modal-content{
+    background:white;
+    width:600px;
+    max-width:90%;
+    margin:5% auto;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 10px 30px rgba(0,0,0,.2);
+}
+
+.close{
+    float:right;
+    font-size:28px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.modal form div{
+    margin-bottom:12px;
+}
+
+.modal label{
+    display:block;
+    margin-bottom:4px;
+    font-weight:600;
+}
+
+.modal input,
+.modal select{
+    width:100%;
+    padding:8px;
+    box-sizing:border-box;
+}
+
+.btn-danger{
+    background:#dc2626;
+    color:white;
+    border:none;
+    padding:8px 14px;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+</style>
+
 <h1>Ventas</h1>
+
+<button
+    class="btn btn-primary"
+    onclick="abrirModalVenta()">
+    Registrar venta
+</button>
+
+<br><br>
+
 {% if ventas %}
+
+<div class="table-wrapper">
+
 <table class="data-table">
+
     <thead>
         <tr>
             <th>Cliente</th>
@@ -13,50 +83,217 @@
             <th>Total</th>
             <th>Fecha</th>
             <th>Estado pago</th>
+            <th>Acciones</th>
         </tr>
     </thead>
+
     <tbody>
+
         {% for venta in ventas %}
         <tr>
+
             <td>{{ venta.cliente }}</td>
+
             <td>{{ venta.servicio }}</td>
-            <td>{{ venta.precio_servicio | currency }}</td>
+
+            <td>
+                {{ venta.precio_servicio | currency }}
+            </td>
+
             <td>{{ venta.cantidad }}</td>
-            <td>{{ venta.total | currency }}</td>
+
+            <td>
+                {{ venta.total | currency }}
+            </td>
+
             <td>{{ venta.fecha }}</td>
+
             <td>{{ venta.estado_pago }}</td>
+
+            <td>
+
+                {% if venta.estado_pago != 'VENCIDO' %}
+                <form
+                    method="post"
+                    action="{{ url_for('anular_venta', id=venta.id_venta) }}"
+                    style="display:inline"
+                    onsubmit="return confirm('¿Anular esta venta?');">
+
+                    <button
+                        type="submit"
+                        class="btn-danger">
+
+                        ANULAR
+
+                    </button>
+
+                </form>
+                {% else %}
+                <span>ANULADA</span>
+                {% endif %}
+
+            </td>
+
         </tr>
         {% endfor %}
+
     </tbody>
+
 </table>
+
+</div>
+
 {% else %}
+
 <p>No hay ventas registradas aún.</p>
+
 {% endif %}
 
-<h2>Registrar venta</h2>
-<form method="post" action="{{ url_for('registrar_venta') }}">
-    <div><label for="id_cliente">Cliente</label>
-        <select id="id_cliente" name="id_cliente" required>
-            {% for cliente in clientes %}
-            <option value="{{ cliente.id_cliente }}">{{ cliente.nombre }}</option>
-            {% endfor %}
-        </select>
+<!-- MODAL REGISTRAR VENTA -->
+
+<div
+    id="modalVenta"
+    class="modal">
+
+    <div class="modal-content">
+
+        <span
+            class="close"
+            onclick="cerrarModalVenta()">
+
+            &times;
+
+        </span>
+
+        <h2>Registrar venta</h2>
+
+        <form
+            method="post"
+            action="{{ url_for('registrar_venta') }}">
+
+            <div>
+
+                <label>Cliente</label>
+
+                <select
+                    name="id_cliente"
+                    required>
+
+                    {% for cliente in clientes %}
+                    <option
+                        value="{{ cliente.id_cliente }}">
+
+                        {{ cliente.nombre }}
+
+                    </option>
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <div>
+
+                <label>Servicio</label>
+
+                <select
+                    name="id_servicio"
+                    required>
+
+                    {% for servicio in servicios %}
+                    <option
+                        value="{{ servicio.id_servicio }}">
+
+                        {{ servicio.nombre }}
+                        -
+                        {{ servicio.precio | currency }}
+
+                    </option>
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <div>
+
+                <label>Campaña</label>
+
+                <select
+                    name="id_campania"
+                    required>
+
+                    {% for campania in campanias %}
+                    <option
+                        value="{{ campania.id_campania }}">
+
+                        {{ campania.nombre }}
+
+                    </option>
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <div>
+
+                <label>Cantidad</label>
+
+                <input
+                    type="number"
+                    name="cantidad"
+                    min="1"
+                    value="1"
+                    required>
+
+            </div>
+
+            <button
+                type="submit"
+                class="btn btn-primary">
+
+                Registrar venta
+
+            </button>
+
+        </form>
+
     </div>
-    <div><label for="id_servicio">Servicio</label>
-        <select id="id_servicio" name="id_servicio" required>
-            {% for servicio in servicios %}
-            <option value="{{ servicio.id_servicio }}">{{ servicio.nombre }} - {{ servicio.precio | currency }}</option>
-            {% endfor %}
-        </select>
-    </div>
-    <div><label for="id_campania">Campaña</label>
-        <select id="id_campania" name="id_campania" required>
-            {% for campania in campanias %}
-            <option value="{{ campania.id_campania }}">{{ campania.nombre }}</option>
-            {% endfor %}
-        </select>
-    </div>
-    <div><label for="cantidad">Cantidad</label><input id="cantidad" name="cantidad" type="number" min="1" value="1" required></div>
-    <button type="submit">Registrar venta</button>
-</form>
+
+</div>
+
+<script>
+
+function abrirModalVenta(){
+
+    document
+        .getElementById('modalVenta')
+        .style.display = 'block';
+
+}
+
+function cerrarModalVenta(){
+
+    document
+        .getElementById('modalVenta')
+        .style.display = 'none';
+
+}
+
+window.onclick = function(event){
+
+    let modal =
+        document.getElementById('modalVenta');
+
+    if(event.target === modal){
+
+        cerrarModalVenta();
+
+    }
+
+}
+
+</script>
+
 {% endblock %}

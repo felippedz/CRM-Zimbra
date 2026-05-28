@@ -1,69 +1,359 @@
 {% extends 'base.html' %}
 {% block title %}Dashboard{% endblock %}
+
 {% block content %}
-<div class="content-header">
-    <h1>Dashboard</h1>
+
+<style>
+
+.dashboard-header{
+    margin-bottom:30px;
+}
+
+.dashboard-header h1{
+    margin:0;
+    font-size:32px;
+    font-weight:700;
+}
+
+.dashboard-header p{
+    color:#6b7280;
+    margin-top:5px;
+}
+
+.dashboard-grid{
+    display:grid;
+    gap:20px;
+}
+
+.columns-2{
+    grid-template-columns:repeat(auto-fit,minmax(400px,1fr));
+}
+
+.columns-3{
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+}
+
+.card{
+    background:white;
+    border-radius:16px;
+    padding:24px;
+    box-shadow:0 4px 15px rgba(0,0,0,.08);
+    transition:.25s;
+}
+
+.card:hover{
+    transform:translateY(-3px);
+    box-shadow:0 8px 25px rgba(0,0,0,.12);
+}
+
+.stat-card{
+    background:linear-gradient(
+        135deg,
+        #2563eb,
+        #1d4ed8
+    );
+
+    color:white;
+    text-align:center;
+}
+
+.stat-card h2{
+    margin:0;
+    font-size:15px;
+    color:rgba(255,255,255,.85);
+}
+
+.stat-card p{
+    margin-top:12px;
+    font-size:34px;
+    font-weight:bold;
+}
+
+.card h2{
+    margin-top:0;
+}
+
+.table-wrapper{
+    width:100%;
+    overflow-x:auto;
+}
+
+.data-table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.data-table tbody tr:hover{
+    background:#f9fafb;
+}
+
+.badge{
+    display:inline-block;
+    padding:6px 12px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:600;
+}
+
+.badge.success{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.badge.warning{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+.cta-card{
+    background:linear-gradient(
+        135deg,
+        #2563eb,
+        #4f46e5
+    );
+
+    color:white;
+}
+
+.cta-card h3{
+    margin-top:0;
+}
+
+.btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:10px 18px;
+    border-radius:10px;
+    font-weight:600;
+    text-decoration:none;
+    cursor:pointer;
+    transition:all .2s ease;
+    border:none;
+}
+
+.btn-primary{
+    background:white;
+    color:#2563eb;
+}
+
+.btn-primary:hover{
+    opacity:.9;
+}
+
+canvas{
+    max-height:350px;
+}
+
+.empty-state{
+    padding:20px;
+    text-align:center;
+    color:#6b7280;
+}
+
+@media(max-width:768px){
+
+    .columns-2,
+    .columns-3{
+        grid-template-columns:1fr;
+    }
+
+}
+
+</style>
+
+<div class="dashboard-header">
+
+    <h1>
+        Bienvenido,
+        {{ current_user.nombre }}
+    </h1>
+
+    <p>
+        Resumen general de tu actividad en CRM Zimbra
+    </p>
+
 </div>
 
 {% if current_user.rol == 'CLIENTE' %}
-    <div class="dashboard-grid columns-2">
-        <div class="card">
-            <h2>Servicios adquiridos</h2>
-            {% if user_services %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Servicio</th>
-                            <th>Precio</th>
-                            <th>Inicio</th>
-                            <th>Fin</th>
-                            <th>Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for servicio in user_services %}
-                        <tr>
-                            <td>{{ servicio.servicio }}</td>
-                            <td>{{ servicio.precio | currency }}</td>
-                            <td>{{ servicio.fecha_inicio }}</td>
-                            <td>{{ servicio.fecha_fin }}</td>
-                            <td>{{ servicio.estado }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <div class="empty-state">No tienes servicios registrados todavía.</div>
-            {% endif %}
-        </div>
-        <div class="card">
-            <h2>Descubre nuevos servicios</h2>
-            <p>Compra servicios online desde tu panel y administra tus suscripciones desde el dashboard.</p>
-            <a class="btn-link" href="{{ url_for('servicios') }}">Ver servicios disponibles</a>
-        </div>
-    </div>
-{% else %}
-    <div class="stats dashboard-grid columns-3">
-        <div class="card"><h2>Total ventas</h2><p>{{ total_ventas.total | currency }}</p></div>
-        <div class="card"><h2>Total clientes</h2><p>{{ total_clientes.total }}</p></div>
-        <div class="card"><h2>Total servicios</h2><p>{{ total_servicios.total }}</p></div>
-    </div>
 
-    <div class="dashboard-grid columns-2">
-        <div class="card">
-            <h2>Ventas por mes</h2>
-            <canvas id="salesChart"></canvas>
-        </div>
-        <div class="card">
-            <h2>Ingresos por campaña</h2>
-            <canvas id="campaignChart"></canvas>
-        </div>
-    </div>
+<div class="dashboard-grid columns-2">
 
-    {% if ventas %}
     <div class="card">
-        <h2>Últimas ventas</h2>
+
+        <h2>
+            📦 Servicios adquiridos
+        </h2>
+
+        {% if user_services %}
+
+        <div class="table-wrapper">
+
+            <table class="data-table">
+
+                <thead>
+                    <tr>
+                        <th>Servicio</th>
+                        <th>Precio</th>
+                        <th>Inicio</th>
+                        <th>Fin</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for servicio in user_services %}
+                    <tr>
+
+                        <td>
+                            {{ servicio.descripcion }}
+                        </td>
+
+                        <td>
+                            {{ servicio.precio | currency }}
+                        </td>
+
+                        <td>
+                            {{ servicio.fecha_inicio }}
+                        </td>
+
+                        <td>
+                            {{ servicio.fecha_fin }}
+                        </td>
+
+                        <td>
+
+                            <span class="badge success">
+                                {{ servicio.estado }}
+                            </span>
+
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <div class="empty-state">
+            No tienes servicios registrados todavía.
+        </div>
+
+        {% endif %}
+
+    </div>
+
+    <div class="card cta-card">
+
+        <h3>
+            🚀 Amplía tus servicios
+        </h3>
+
+        <p>
+            Explora nuevos servicios y gestiona
+            tus suscripciones desde un solo lugar.
+        </p>
+
+        <a
+            class="btn btn-primary"
+            href="{{ url_for('servicios') }}">
+
+            Ver servicios
+
+        </a>
+
+    </div>
+
+</div>
+
+{% else %}
+
+<div class="dashboard-grid columns-3">
+
+    <div class="card stat-card">
+
+        <h2>
+            💰 Total ventas
+        </h2>
+
+        <p>
+            {{ total_ventas.total | currency }}
+        </p>
+
+    </div>
+
+    <div class="card stat-card">
+
+        <h2>
+            👥 Total clientes
+        </h2>
+
+        <p>
+            {{ total_clientes.total }}
+        </p>
+
+    </div>
+
+    <div class="card stat-card">
+
+        <h2>
+            🛠️ Total servicios
+        </h2>
+
+        <p>
+            {{ total_servicios.total }}
+        </p>
+
+    </div>
+
+</div>
+
+<br>
+
+<div class="dashboard-grid columns-2">
+
+    <div class="card">
+
+        <h2>
+            📈 Ventas por mes
+        </h2>
+
+        <canvas id="salesChart"></canvas>
+
+    </div>
+
+    <div class="card">
+
+        <h2>
+            🎯 Ingresos por campaña
+        </h2>
+
+        <canvas id="campaignChart"></canvas>
+
+    </div>
+
+</div>
+
+<br>
+
+{% if ventas %}
+
+<div class="card">
+
+    <h2>
+        🧾 Últimas ventas
+    </h2>
+
+    <div class="table-wrapper">
+
         <table class="data-table">
+
             <thead>
                 <tr>
                     <th>ID</th>
@@ -73,80 +363,177 @@
                     <th>Estado</th>
                 </tr>
             </thead>
+
             <tbody>
+
                 {% for venta in ventas %}
                 <tr>
-                    <td>{{ venta.id_venta }}</td>
-                    <td>{{ venta.nombre }}</td>
-                    <td>{{ venta.total | currency }}</td>
-                    <td>{{ venta.fecha }}</td>
-                    <td>{{ venta.estado_pago }}</td>
+
+                    <td>
+                        {{ venta.id_venta }}
+                    </td>
+
+                    <td>
+                        {{ venta.nombre }}
+                    </td>
+
+                    <td>
+                        {{ venta.total | currency }}
+                    </td>
+
+                    <td>
+                        {{ venta.fecha }}
+                    </td>
+
+                    <td>
+
+                        {% if venta.estado_pago == 'PAGADO' %}
+
+                            <span class="badge success">
+                                Pagado
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge warning">
+                                {{ venta.estado_pago }}
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
                 </tr>
                 {% endfor %}
+
             </tbody>
+
         </table>
+
     </div>
-    {% endif %}
+
+</div>
+
 {% endif %}
+
+{% endif %}
+
 {% endblock %}
 
 {% block scripts %}
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-    {% if current_user.rol != 'CLIENTE' %}
-    const salesData = {
-        labels: {{ chart_labels | tojson }},
-        datasets: [{
-            label: 'Ventas',
-            data: {{ chart_values | tojson }},
-            borderColor: '#1f3c88',
-            backgroundColor: 'rgba(31,60,136,0.2)',
-            tension: 0.35,
-            fill: true,
-        }]
-    };
 
-    const campaignData = {
-        labels: {{ campaign_labels | tojson }},
-        datasets: [{
-            label: 'Ingresos',
-            data: {{ campaign_values | tojson }},
-            backgroundColor: ['#4CAF50', '#FFB300', '#8E24AA', '#039BE5', '#F4511E'],
-            borderWidth: 0
-        }]
-    };
+{% if current_user.rol != 'CLIENTE' %}
 
-    new Chart(document.getElementById('salesChart'), {
-        type: 'line',
-        data: salesData,
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false },
-                title: { display: false }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: '#eef2f7' }
-                },
-                x: {
-                    grid: { color: '#eef2f7' }
+const salesData = {
+
+    labels: {{ chart_labels | tojson }},
+
+    datasets: [{
+
+        label: 'Ventas',
+
+        data: {{ chart_values | tojson }},
+
+        borderColor: '#2563eb',
+
+        backgroundColor: 'rgba(37,99,235,.15)',
+
+        tension: 0.35,
+
+        fill: true
+
+    }]
+
+};
+
+const campaignData = {
+
+    labels: {{ campaign_labels | tojson }},
+
+    datasets: [{
+
+        label: 'Ingresos',
+
+        data: {{ campaign_values | tojson }},
+
+        backgroundColor: [
+
+            '#2563eb',
+            '#10b981',
+            '#f59e0b',
+            '#8b5cf6',
+            '#ef4444'
+
+        ],
+
+        borderWidth:0
+
+    }]
+
+};
+
+new Chart(
+
+    document.getElementById('salesChart'),
+
+    {
+
+        type:'line',
+
+        data:salesData,
+
+        options:{
+
+            responsive:true,
+
+            plugins:{
+
+                legend:{
+                    display:false
                 }
-            }
-        }
-    });
 
-    new Chart(document.getElementById('campaignChart'), {
-        type: 'doughnut',
-        data: campaignData,
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { position: 'bottom' }
             }
+
         }
-    });
-    {% endif %}
+
+    }
+
+);
+
+new Chart(
+
+    document.getElementById('campaignChart'),
+
+    {
+
+        type:'doughnut',
+
+        data:campaignData,
+
+        options:{
+
+            responsive:true,
+
+            plugins:{
+
+                legend:{
+                    position:'bottom'
+                }
+
+            }
+
+        }
+
+    }
+
+);
+
+{% endif %}
+
 </script>
+
 {% endblock %}

@@ -33,7 +33,9 @@ from auth import (
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'zimbra_secret_key_2026')
 
-
+@app.route('/test_bd')
+def test_bd():
+    return str(fetchone("SELECT DB_NAME() AS bd"))
 @app.context_processor
 def inject_theme():
     user = current_user()
@@ -969,12 +971,34 @@ def registrar_venta():
     return redirect(url_for('ventas'))
 
 # =====================================================
+# ANULAR VENTA
+# =====================================================
+
+
+@app.route('/ventas/anular/<int:id>', methods=['POST'])
+@require_role('ADMIN', 'EMPLEADO')
+def anular_venta(id):
+
+    try:
+        execute(
+            "UPDATE ventas SET estado_pago = 'VENCIDO' WHERE id_venta = ?",
+            (id,)
+        )
+    except Exception as e:
+        flash(str(e), 'error')
+
+    return redirect(url_for('ventas'))
+
+# =====================================================
 # CAMPANIAS
 # =====================================================
 
 @app.route('/campanias')
 @require_role('ADMIN')
 def campanias():
+
+    print(fetchone("SELECT DB_NAME() AS bd"))
+
 
     lista = fetchall("""
     SELECT
@@ -1006,6 +1030,7 @@ def registrar_campania():
     fecha_inicio = request.form['fecha_inicio']
     fecha_fin = request.form['fecha_fin']
     objetivo = request.form['objetivo']
+    
 
     try:
         execute("""
@@ -1046,6 +1071,7 @@ def editar_campania(id):
         fecha_inicio = request.form['fecha_inicio']
         fecha_fin = request.form['fecha_fin']
         objetivo = request.form['objetivo']
+        
 
         try:
             execute("""
@@ -1080,18 +1106,20 @@ def editar_campania(id):
     WHERE id_campania = ?
     """, (id,))
 
-    campanias = fetchall("""
-    SELECT
-        id_campania,
-        nombre,
-        medio_contacto,
-        presupuesto,
-        fecha_inicio,
-        fecha_fin,
-        objetivo
-    FROM campanias
-    ORDER BY fecha_inicio DESC
-    """)
+    print(fetchone("SELECT DB_NAME() AS bd"))
+    campanias= fetchall("""
+SELECT
+    id_campania,
+    nombre,
+    medio_contacto,
+    presupuesto,
+    fecha_inicio,
+    fecha_fin,
+    objetivo
+
+FROM campanias
+ORDER BY fecha_inicio DESC
+""")
 
     return render_template(
         'campanias.html',
